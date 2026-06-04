@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+.hero {
+  min-height: 575px;
+  padding: 3rem;
+  background:
+    radial-gradient(circle at 0% 100%, var(--blue-200), transparent 40%),
+    radial-gradient(circle at 25% 100%, var(--green-300), transparent 40%),
+    radial-gradient(circle at 50% 100%, var(--green-300), transparent 45%),
+    radial-gradient(circle at 75% 100%, var(--blue-300), transparent 45%),
+    radial-gradient(circle at 100% 100%, var(--blue-200), transparent 40%);
+}
+.headings {
+  text-align: center;
+  padding: 1rem;
+}
+.headings h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+.headings p {
+  color: var(--grey-600);
+  margin: 0.25rem 0;
+}
+.subheading1 {
+  font-size: 1.5rem;
+}
+.subheading2 {
+  font-size: 1rem;
+}
+.features {
+  min-height: 750px;
+  background: #fff;
+}

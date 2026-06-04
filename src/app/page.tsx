@@ -1,5 +1,23 @@
 import styles from './page.module.css';
 
 export default function Home() {
-  return <div></div>;
+  return (
+    <div className={styles.container}>
+      <div className={styles.hero}>
+        <div className={styles.heroContent}>
+          <section className={styles.headings}>
+            <h1>Everything saved. Only a few things in view.</h1>
+            <p className={styles.subheading1}>
+              Keep a few tasks at the front while the rest stays in your backlog.
+            </p>
+            <p className={styles.subheading2}>
+              A calmer way to manage tasks and ideas.
+            </p>
+          </section>
+        </div>
+      </div>
+      <div className={styles.features}></div>
+      <div className={styles.callToAction}></div>
+    </div>
+  );
 }
