@@ -1,6 +1,10 @@
+'use client'
 import styles from './page.module.css';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
@@ -13,7 +17,7 @@ export default function Home() {
             <p className={styles.subheading2}>
               A calmer way to manage tasks and ideas.
             </p>
-            <button className={styles.startBtn}>Get organized</button>
+            <button className={styles.startBtn} onClick={() => router.push('/signup')}>Get organized</button>
           </section>
           {/* Will add some images here later and possibly change layout */}
         </div>
