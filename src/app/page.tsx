@@ -13,7 +13,9 @@ export default function Home() {
             <p className={styles.subheading2}>
               A calmer way to manage tasks and ideas.
             </p>
+            <button className={styles.startBtn}>Get organized</button>
           </section>
+          {/* Will add some images here later and possibly change layout */}
         </div>
       </div>
       <div className={styles.features}></div>
