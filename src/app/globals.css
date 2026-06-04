@@ -62,7 +62,7 @@ body {
     radial-gradient(circle at 50% 100%, var(--green-300), transparent 45%),
     radial-gradient(circle at 75% 100%, var(--blue-300), transparent 45%),
     radial-gradient(circle at 100% 100%, var(--blue-200), transparent 40%);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
