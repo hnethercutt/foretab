@@ -3,8 +3,11 @@
   flex-direction: column;
 }
 .hero {
+  margin-top: -54px;
   min-height: 575px;
   padding: 3rem;
+  padding-top: 54px;
+  z-index: 1;
   background:
     radial-gradient(circle at 0% 100%, var(--blue-200), transparent 40%),
     radial-gradient(circle at 25% 100%, var(--green-300), transparent 40%),
