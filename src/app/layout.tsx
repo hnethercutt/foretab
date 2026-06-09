@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.variable}`}>
-        <header>FrontTable</header>
+        <header>Foretab</header>
         <main>{children}</main>
       </body>
     </html>
