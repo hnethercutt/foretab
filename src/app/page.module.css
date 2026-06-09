@@ -3,8 +3,12 @@
   flex-direction: column;
 }
 .hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-top: -54px;
   min-height: 575px;
+  width: 100vw;
   padding: 3rem;
   padding-top: 54px;
   z-index: 1;
@@ -15,13 +19,20 @@
     radial-gradient(circle at 75% 100%, var(--blue-300), transparent 45%),
     radial-gradient(circle at 100% 100%, var(--blue-200), transparent 40%);
 }
+.content {
+  width: 100%;
+}
 .headings {
   text-align: center;
+  text-wrap: nowrap;
   padding: 1rem;
 }
 .headings h1 {
   font-size: 3rem;
   margin-bottom: 0.5rem;
+}
+.headings h2 {
+  font-size: 2rem;
 }
 .headings p {
   margin: 0.25rem 0;
@@ -46,7 +57,23 @@
 .startBtn:hover {
   background: var(--blue-500);
 }
-.features {
-  min-height: 750px;
+.problemSolution {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  min-height: 500px;
   background: #fff;
+  padding: 3rem;
 }
+.problemSolutionsContainer {
+  display: flex;
+  margin-top: 2rem;
+}
+.problemSolutionCard {
+  width: 50%;
+}
+.problemSolutionCard ul {
+  list-style-type: none;
+}
+
+
