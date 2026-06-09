@@ -13,11 +13,11 @@
   padding-top: 54px;
   z-index: 1;
   background:
-    radial-gradient(circle at 0% 100%, var(--blue-200), transparent 40%),
-    radial-gradient(circle at 25% 100%, var(--green-300), transparent 40%),
-    radial-gradient(circle at 50% 100%, var(--green-300), transparent 45%),
-    radial-gradient(circle at 75% 100%, var(--blue-300), transparent 45%),
-    radial-gradient(circle at 100% 100%, var(--blue-200), transparent 40%);
+    radial-gradient(circle at 0% 0%, var(--blue-200), transparent 30%),
+    radial-gradient(circle at 25% 0%, var(--green-300), transparent 30%),
+    radial-gradient(circle at 50% 0%, var(--green-300), transparent 35%),
+    radial-gradient(circle at 75% 0%, var(--blue-300), transparent 35%),
+    radial-gradient(circle at 100% 0%, var(--blue-200), transparent 30%);
 }
 .content {
   width: 100%;
@@ -67,10 +67,13 @@
 }
 .problemSolutionsContainer {
   display: flex;
+  align-content: center;
   margin-top: 2rem;
 }
 .problemSolutionCard {
-  width: 50%;
+  width: fit-content;
+  padding: 12px;
+  text-align: left;
 }
 .problemSolutionCard ul {
   list-style-type: none;
