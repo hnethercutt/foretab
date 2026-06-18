@@ -7,7 +7,7 @@
   justify-content: center;
   align-items: center;
   margin-top: -54px;
-  min-height: 575px;
+  min-height: 500px;
   width: 100vw;
   padding: 3rem;
   padding-top: 54px;
@@ -51,11 +51,11 @@
   font-size: 1rem;
   border: none;
   border-radius: 25px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  background: var(--blue-400);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06), 0px 4px 12px rgba(0, 0, 0, 0.02);
+  background: var(--blue-300);
 }
 .startBtn:hover {
-  background: var(--blue-500);
+  background: var(--blue-400);
 }
 .problemSolution {
   display: flex;
@@ -65,18 +65,88 @@
   background: #fff;
   padding: 3rem;
 }
-.problemSolutionsContainer {
+.problemsContainer {
   display: flex;
-  align-content: center;
+  justify-content: center;
   margin-top: 2rem;
 }
-.problemSolutionCard {
-  width: fit-content;
-  padding: 12px;
+.problemCard {
+  width: 35%;
+  padding: 24px 16px;
+  margin: 1.25rem;
   text-align: left;
+  border-radius: 16px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06), 0px 4px 12px rgba(0, 0, 0, 0.02);
 }
-.problemSolutionCard ul {
+.problemCard h2 {
+  text-align: center;
+}
+.problemCard ul {
   list-style-type: none;
+  margin-top: 12px;
+}
+.problemCard ul li {
+  background-color: var(--background);
+  padding: 16px;
+  margin: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.features {
+  min-height: 500px;
+  padding: 3rem;
+  text-align: center;
+  background: linear-gradient(to bottom, var(--background), var(--background), var(--blue-50));
+}
+.howItWorks {
+  padding: 3rem;
+  background-color: var(--blue-50);
+}
+.howItWorksContainer {
+  min-height: 500px;
+  margin-top: 2rem;
+}
+.howItWorksCard {
+  background-color: var(--background);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06), 0px 4px 12px rgba(0, 0, 0, 0.02);
+  width: 40%;
+  margin: 1.25rem;
+  padding: 24px;
+  border-radius: 16px;
+}
+.howItWorks p {
+  margin-top: 0.5rem;
+}
+.stepRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.numberedStep {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--green-300);
+  width: 32px;
+  height: 32px;
+  padding: 16px;
+  border-radius: 50px;
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+}
+.icon {
+  color: var(--grey-600);
+}
+.problemIcon {
+  color: var(--accent);
+}
+.lightBlueBackground {
+  background-color: var(--blue-100);
+}
+.lightGreenBackground {
+  background-color: var(--green-100);
 }
 
 

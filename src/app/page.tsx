@@ -1,6 +1,7 @@
 'use client'
 import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
+import { Frown, NotebookPen, SmilePlus, AppWindow, Repeat } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -24,60 +25,82 @@ export default function Home() {
       </div>
       <div className={styles.problemSolution}>
         <div className={styles.content}>
-          <h1>Task systems tend to lean toward one of two extremes</h1>
-          <div className={styles.problemSolutionsContainer}>
-            <div className={styles.problemSolutionCard}>
+          <h1>Task systems tend to lean toward one of two extremes:</h1>
+          <div className={styles.problemsContainer}>
+            <div className={`${styles.problemCard} ${styles.lightBlueBackground}`}>
               <h2>Too much structure</h2>
               <ul>
-                <li>Everything needs to be put on a schedule</li>
-                <li>When life happens, tasks get skipped</li>
-                <li>Staying organized is just another task to complete</li>
+                <li><Frown className={styles.problemIcon}/><span>Everything needs to be put on a schedule.</span></li>
+                <li><Frown className={styles.problemIcon}/>When life happens, tasks get skipped.</li>
+                <li><Frown className={styles.problemIcon}/>Staying organized becomes a lot of work.</li>
               </ul>
             </div>
-            <div className={styles.problemSolutionCard}>
+            <div className={`${styles.problemCard} ${styles.lightGreenBackground}`}>
               <h2>Too little structure</h2>
               <ul>
-                <li>Everything sits in one overwhelming list</li>
-                <li>Nothing tells you what to look at right now</li>
-                <li>Too many choices can make it hard to start anything</li>
+                <li><Frown className={styles.problemIcon}/>Everything sits in one overwhelming list.</li>
+                <li><Frown className={styles.problemIcon}/>Nothing tells you what to look at right now.</li>
+                <li><Frown className={styles.problemIcon}/>Too many choices can make it hard to start anything.</li>
               </ul>
             </div>
           </div>
-          <p>For many people, neither approach fits well. Foretab sits in the middle.</p>
-          <p>Enough structure to stay focused. Enough freedom to not feel pressured.</p>
+          <div className={styles.headings}>
+            <p className={styles.subheading1}>For many people, neither approach fits well. Foretab sits in the middle.</p>
+            <p className={styles.subheading2}>Enough structure to stay focused. Enough freedom to not feel pressured.</p>
+          </div>
         </div>
       </div>
-      <div>
+      <div className={styles.features}>
         <div className={styles.content}>
-          <h1>How it works</h1>
-          <div>
-            <div>
+          <h1>Your mind is already chaotic. You don't need features that cause more chaos.</h1>
+        </div>
+      </div>
+      <div className={styles.howItWorks}>
+        <div className={styles.content}>
+          <div className={styles.howItWorksContainer}>
+            <div className={styles.howItWorksCard}>
+              <div className={styles.stepRow}>
+                <div className={styles.numberedStep}>01</div>
+                <NotebookPen className={styles.icon}/>
+              </div>
               <h2>Get it out of your head</h2>
-              <p>Dump tasks and ideas into one place so you don't have to hold them mentally</p>
+              <p className={styles.subheading2}>Dump tasks and ideas from your mental backlog into one place.</p>
             </div>
-            <div>
-              <h2>Move things into your current tab</h2>
-              <p>Bring in what you want to work on over the next few weeks. This is just a way to guide your focus, not a deadline.</p>
+            <div className={styles.howItWorksCard}>
+              <div className={styles.stepRow}>
+                <div className={styles.numberedStep}>02</div>
+                <SmilePlus className={styles.icon}/>
+              </div>
+              <h2>Add things to your current tab</h2>
+              <p className={styles.subheading2}>Bring in what you want to work on over the next few weeks.</p>
             </div>
-            <div>
-              <h2>Work from your current tab</h2>
-              <p>Everything else stays in your backlog while you focus</p>
+            <div className={styles.howItWorksCard}>
+              <div className={styles.stepRow}>
+                <div className={styles.numberedStep}>03</div>
+                <AppWindow className={styles.icon}/>
+              </div>
+              <h2>Complete tasks from your tab at your own pace</h2>
+              <p className={styles.subheading2}>Everything else stays in your backlog while you focus.</p>
             </div>
-            <div>
-              <h2>Nothing gets lost</h2>
-              <p>Anything unfinished moves into your next tab automatically.</p>
+            <div className={styles.howItWorksCard}>
+              <div className={styles.stepRow}>
+                <div className={styles.numberedStep}>04</div>
+                <Repeat className={styles.icon}/>
+              </div>
+              <h2>Repeat the cycle</h2>
+              <p className={styles.subheading2}>Anything unfinished moves into your next tab automatically.</p>
             </div>
           </div>
         </div>
       </div>
-      <div className={styles.callToAction}>
+      {/* <div className={styles.callToAction}>
         <div className={styles.content}>
           <div>
             <h2>You don't have to feel overwhelmed.</h2>
             <p>Work through things one tab at a time</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
