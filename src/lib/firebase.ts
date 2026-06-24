@@ -22,4 +22,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+// Force sign in with google popup to always show. For testing in dev only.
+// provider.setCustomParameters({
+//   prompt: 'select_account'
+// });
+
 export { app, auth, db, provider };

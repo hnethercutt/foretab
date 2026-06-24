@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Tooltip } from '@mui/material';
 import { validateAllSignupForms } from '@/validators/signup-validator';
 import { SignupFormData } from '@/types/auth';
+import { createUserWithSignupForm } from '@/services/user-service';
 import _ from 'lodash';
 
 export default function SignupForm() {
@@ -17,7 +18,7 @@ export default function SignupForm() {
     confirmPassword: '',
   });
 
-  const [errors, setErrors] = useState<SignupFormData>({
+  const [signupFormErrors, setSignupFormErrors] = useState<SignupFormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -39,16 +40,16 @@ export default function SignupForm() {
     // Writes over the data stored at previous entered key for the specific form
     setSignupFormData((prevSignupFormData) => ({
       ...prevSignupFormData,
-      [name] : value
+      [name]: value,
     }));
 
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name] : ''
+    setSignupFormErrors((prevSignupFormErrors) => ({
+      ...prevSignupFormErrors,
+      [name]: '',
     }));
 
     // Resets the show/hide password button if user erases all of their input
-    if(name === 'password' && value === '') {
+    if (name === 'password' && value === '') {
       setPasswordIsVisible(false);
     }
   };
@@ -58,16 +59,17 @@ export default function SignupForm() {
     e.preventDefault();
     let name = e.target.name as keyof SignupFormData;
 
-     // Prevents displaying errors when simply clicking the show/hide password button
-    if(!e.relatedTarget || !e.relatedTarget.ariaLabel || (e.relatedTarget.ariaLabel && !e.relatedTarget.ariaLabel.toLowerCase().includes('password')) ) {
-        let errors = validateAllSignupForms(signupFormData);
-        /*
-         * Validator returns errors for all forms, but we only want to display the error message for this specific field
-         * Prevents error messages from displaying prematurely and also prevents them from disappearing when a user starts typing in a different field
-        */
-        setErrors((prevErrors) => ({
-        ...prevErrors,
-        [name] : errors[name]
+    // Prevents displaying errors when simply clicking the show/hide password button
+    if (!e.relatedTarget || !e.relatedTarget.ariaLabel ||
+       (e.relatedTarget.ariaLabel && !e.relatedTarget.ariaLabel.toLowerCase().includes('password'))) {
+      let errors = validateAllSignupForms(signupFormData);
+      /*
+       * Validator returns errors for all forms, but we only want to display the error message for this specific field
+       * Prevents error messages from displaying prematurely and also prevents them from disappearing when a user starts typing in a different field
+       */
+      setSignupFormErrors((prevSignupFormErrors) => ({
+        ...prevSignupFormErrors,
+        [name]: errors[name],
       }));
     }
   };
@@ -77,93 +79,101 @@ export default function SignupForm() {
     let errors = validateAllSignupForms(signupFormData);
 
     _.forEach(signupFormData, (value, key) => {
-        // Ensures if a user clicks the continue button without ever typing in a field, ALL errors will display on submit
-        if(value === '') {
+      // Ensures if a user clicks the continue button without ever typing in a field, ALL errors will display on submit
+      if (value === '') {
         let name = key as keyof SignupFormData;
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            [name] : errors[name]
+        setSignupFormErrors((prevSignupFormErrors) => ({
+          ...prevSignupFormErrors,
+          [name]: errors[name],
         }));
-    }
-});
+      }
+    });
   }
 
-  return (
-      <div>
-        <Form action="">
-          <div>
-            <label>First Name*</label>
-            <input
-              name="firstName"
-              id="firstName"
-              value={signupFormData.firstName}
-              onChange={updateFormData}
-              onBlur={validateForm}
-            ></input>
-          </div>
-          {errors.firstName && <div>{errors.firstName}</div>}
-          <div>
-            <label>Last Name*</label>
-            <input
-              name="lastName"
-              id="lastName"
-              value={signupFormData.lastName}
-              onChange={updateFormData}
-              onBlur={validateForm}
-            ></input>
-          </div>
-          {errors.lastName && <div>{errors.lastName}</div>}
-          <div>
-            <label>Email*</label>
-            <input
-              name="email"
-              id="email"
-              value={signupFormData.email}
-              onChange={updateFormData}
-              onBlur={validateForm}
-            ></input>
-          </div>
-          {errors.email && <div>{errors.email}</div>}
-          <div>
-            <label>Password*</label>
-            <input
-              name="password"
-              id="password"
-              value={signupFormData.password}
-              type={passwordIsVisible ? ("input") : ("password")}
-              autoComplete="new-password"
-              onChange={updateFormData}
-              onBlur={validateForm}
-            ></input>
-            {signupFormData.password &&
-            <Tooltip title={passwordIsVisible ? "Hide Password" : "Show Password"}>
-              <button onClick={togglePasswordVisibility} tabIndex={-1}>
-                {passwordIsVisible ? (
-                  <EyeOff />
-                ) : (
-                  <Eye />
-                )}
-              </button>
-            </Tooltip>}
-          </div>
-          {errors.password && <div>{errors.password}</div>}
-          <div>
-            <label>Confirm Password*</label>
-            <input
-              name="confirmPassword"
-              id="confirmPassword"
-              value={signupFormData.confirmPassword}
-              type="password"
-              onChange={updateFormData}
-              onBlur={validateForm}
-            ></input>
-          </div>
-          {errors.confirmPassword && <div>{errors.confirmPassword}</div>}
-          <button type="submit">
-            Continue
-          </button>
-        </Form>
-      </div>
+  const continueBtnClicked = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    validateAllForms();
+    let allFormsValid = _.every(signupFormErrors, (value) => value === '');
 
+    if(allFormsValid) {
+        createUserWithSignupForm(signupFormData).then(function(_result) {
+            let result = _result;
+        });
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={continueBtnClicked}>
+        <div>
+          <label>First Name*</label>
+          <input
+            name="firstName"
+            id="firstName"
+            value={signupFormData.firstName}
+            onChange={updateFormData}
+            onBlur={validateForm}
+          ></input>
+        </div>
+        {signupFormErrors.firstName && <div>{signupFormErrors.firstName}</div>}
+        <div>
+          <label>Last Name*</label>
+          <input
+            name="lastName"
+            id="lastName"
+            value={signupFormData.lastName}
+            onChange={updateFormData}
+            onBlur={validateForm}
+          ></input>
+        </div>
+        {signupFormErrors.lastName && <div>{signupFormErrors.lastName}</div>}
+        <div>
+          <label>Email*</label>
+          <input
+            name="email"
+            id="email"
+            value={signupFormData.email}
+            onChange={updateFormData}
+            onBlur={validateForm}
+          ></input>
+        </div>
+        {signupFormErrors.email && <div>{signupFormErrors.email}</div>}
+        <div>
+          <label>Password*</label>
+          <input
+            name="password"
+            id="password"
+            value={signupFormData.password}
+            type={passwordIsVisible ? 'input' : 'password'}
+            autoComplete="new-password"
+            onChange={updateFormData}
+            onBlur={validateForm}
+          ></input>
+          {signupFormData.password && (
+            <Tooltip
+              title={passwordIsVisible ? 'Hide Password' : 'Show Password'}
+            >
+              <button onClick={togglePasswordVisibility} tabIndex={-1}>
+                {passwordIsVisible ? <EyeOff /> : <Eye />}
+              </button>
+            </Tooltip>
+          )}
+        </div>
+        {signupFormErrors.password && <div>{signupFormErrors.password}</div>}
+        <div>
+          <label>Confirm Password*</label>
+          <input
+            name="confirmPassword"
+            id="confirmPassword"
+            value={signupFormData.confirmPassword}
+            type="password"
+            onChange={updateFormData}
+            onBlur={validateForm}
+          ></input>
+        </div>
+        {signupFormErrors.confirmPassword && <div>{signupFormErrors.confirmPassword}</div>}
+        <button type="submit">Continue</button>
+      </form>
+    </div>
   );
 }
