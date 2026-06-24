@@ -2,22 +2,24 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { signInWithGoogle } from '@/services/user-service';
+import { useLoading } from '@/hooks/use-loading';
 import Image from 'next/image';
 import './google-continue-button.css';
 
 export default function GoogleContinueButton() {
   const router = useRouter();
+  const { withLoading } = useLoading();
   const [error, setError] = useState('');
 
+
   const continueWithGoogle = async () => {
-    signInWithGoogle().then(function (_result) {
-      if (!_result.success) {
-        // Same message for any failed attempt
-        setError(_result.message);
-      } else {
-        router.push('/');
-      }
-    });
+    let result = await withLoading(() => signInWithGoogle());
+
+    if(!result.success) {
+        setError(result.message);
+        return;
+    }
+    router.push('/');
   };
 
   return (
