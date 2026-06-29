@@ -2,6 +2,7 @@
 
 import Form from 'next/form';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { Tooltip } from '@mui/material';
 import { validateAllSignupForms } from '@/validators/signup-validator';
@@ -10,6 +11,8 @@ import { createUserWithSignupForm } from '@/services/user-service';
 import _ from 'lodash';
 
 export default function SignupForm() {
+  const router = useRouter();
+
   const [signupFormData, setSignupFormData] = useState<SignupFormData>({
     firstName: '',
     lastName: '',
@@ -96,9 +99,16 @@ export default function SignupForm() {
     let allFormsValid = _.every(signupFormErrors, (value) => value === '');
 
     if(allFormsValid) {
-        createUserWithSignupForm(signupFormData).then(function(_result) {
-            let result = _result;
-        });
+      createUserWithSignupForm(signupFormData).then(function(_result) {
+          if(!_result.success && _result.message.startsWith('The email')) {
+            setSignupFormErrors((prevSignupFormErrors) => ({
+              ...prevSignupFormErrors,
+              email: _result.message
+            }));
+          } else {
+            router.push('/');
+          }
+      });
     }
   };
 
