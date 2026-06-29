@@ -1,7 +1,7 @@
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, provider } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, signInWithPopup, updateProfile, User } from 'firebase/auth';
-import { SignupFormData } from '@/types/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, updateProfile, User } from 'firebase/auth';
+import { SigninFormData, SignupFormData } from '@/types/auth';
 import { FirebaseError } from 'firebase/app';
 
 // Adds the user to firestore database
@@ -32,6 +32,17 @@ export async function createUserWithSignupForm(data: SignupFormData): Promise<{ 
         // This is the only error that won't be checked until the user submits the signup form
         if(err.code === 'auth/email-already-in-use') {
             return { success: false, message: 'The email address is already in use by another account.' };
+        }
+        return { success: false, message: err.code };
+    });
+}
+
+export async function userSignin(data: SigninFormData): Promise<{ success: boolean; message: string;}> {
+    return signInWithEmailAndPassword(auth, data.email, data.password).then(async(_result) => {
+        return { success: true, message: 'User successfully signed in.' };
+    }).catch((err: FirebaseError) => {
+        if(err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-email') {
+            return { success: false, message: 'Invalid email or password.' };
         }
         return { success: false, message: err.code };
     });
