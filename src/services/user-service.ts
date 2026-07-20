@@ -1,7 +1,8 @@
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, DocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { auth, db, provider } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, updateProfile, User } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, updateProfile, User, signOut } from 'firebase/auth';
 import { SigninFormData, SignupFormData } from '@/types/auth';
+import { UserAccount } from '@/types/user-account';
 import { FirebaseError } from 'firebase/app';
 
 // Adds the user to firestore database
@@ -12,6 +13,12 @@ export async function createUserDoc(user: User) {
         displayName: user.displayName,
         email: user.email
     }, { merge: true });
+}
+
+// Used to convert the firebase user object to a UserAccount
+export async function getUserDoc(accountId: string): Promise<UserAccount> {
+    let user = await getDoc(doc(db, 'users', accountId));
+    return user.data() as UserAccount;
 }
 
 // Displays googles login page in a pop up and handles the result
@@ -46,4 +53,14 @@ export async function userSignin(data: SigninFormData): Promise<{ success: boole
         }
         return { success: false, message: err.code };
     });
+}
+
+export async function userSignout(): Promise<Boolean> {
+    try {
+        await signOut(auth);
+    } catch (err) {
+        throw new Error(`Sign out error: ${err}`);
+    }
+
+    return true;
 }
