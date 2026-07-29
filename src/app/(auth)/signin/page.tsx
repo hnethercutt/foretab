@@ -1,12 +1,12 @@
 'use client';
 import GoogleContinueButton from '@/components/google-continue-button';
-import SignupForm from '@/components/signup-form';
+import SigninForm from '@/components/signin-form';
 
-export default function Signup() {
+export default function Signin() {
   return (
     <div>
       <GoogleContinueButton />
-      <SignupForm />
+      <SigninForm />
     </div>
   );
 }
