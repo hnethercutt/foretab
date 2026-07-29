@@ -14,20 +14,20 @@ export default function SignupForm() {
 
   const [signinFormData, setSigninFormData] = useState<SigninFormData>({
     email: '',
-    password: ''
+    password: '',
   });
 
   const [signinFormError, setSigninFormError] = useState('');
 
   // Display the correct show/hide password icon
   const [passwordIsVisible, setPasswordIsVisible] = useState(false);
-  const togglePasswordVisibility = async(e: React.MouseEvent<HTMLButtonElement>) => {
+  const togglePasswordVisibility = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setPasswordIsVisible(!passwordIsVisible);
   };
 
   // Update the data for the selected form whenever a user clicks out of it
-  const updateFormData = async(e: React.ChangeEvent<HTMLInputElement>) => {
+  const updateFormData = async (e: React.ChangeEvent<HTMLInputElement>) => {
     let { name, value } = e.target;
 
     // Writes over the data stored at previous entered key for the specific form
@@ -45,7 +45,7 @@ export default function SignupForm() {
   const continueBtnClicked = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     let result = await withLoading(() => userSignin(signinFormData));
-    if(result.success) {
+    if (result.success) {
       router.push('/');
     } else {
       setSigninFormError(result.message);

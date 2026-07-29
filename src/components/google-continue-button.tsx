@@ -11,13 +11,12 @@ export default function GoogleContinueButton() {
   const { withLoading } = useLoading();
   const [error, setError] = useState('');
 
-
   const continueWithGoogle = async () => {
     let result = await withLoading(() => signInWithGoogle());
 
-    if(!result.success) {
-        setError(result.message);
-        return;
+    if (!result.success) {
+      setError(result.message);
+      return;
     }
     router.push('/');
   };

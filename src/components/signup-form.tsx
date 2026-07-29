@@ -26,18 +26,18 @@ export default function SignupForm() {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
 
   // Display the correct show/hide password icon
   const [passwordIsVisible, setPasswordIsVisible] = useState(false);
-  const togglePasswordVisibility = async(e: React.MouseEvent<HTMLButtonElement>) => {
+  const togglePasswordVisibility = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setPasswordIsVisible(!passwordIsVisible);
   };
 
   // Update the data for the selected form whenever a user clicks out of it
-  const updateFormData = async(e: React.ChangeEvent<HTMLInputElement>) => {
+  const updateFormData = async (e: React.ChangeEvent<HTMLInputElement>) => {
     let { name, value } = e.target;
 
     // Writes over the data stored at previous entered key for the specific form
@@ -58,7 +58,7 @@ export default function SignupForm() {
   };
 
   // Check for an error for a form field when a user clicks off of it.
-  const validateForm = async(e: React.FocusEvent<HTMLInputElement>) => {
+  const validateForm = async (e: React.FocusEvent<HTMLInputElement>) => {
     e.preventDefault();
     let name = e.target.name as keyof SignupFormData;
 
@@ -98,16 +98,16 @@ export default function SignupForm() {
     validateAllForms();
     let allFormsValid = _.every(signupFormErrors, (value) => value === '');
 
-    if(allFormsValid) {
-      createUserWithSignupForm(signupFormData).then(function(_result) {
-          if(!_result.success && _result.message.startsWith('The email')) {
-            setSignupFormErrors((prevSignupFormErrors) => ({
-              ...prevSignupFormErrors,
-              email: _result.message
-            }));
-          } else {
-            router.push('/');
-          }
+    if (allFormsValid) {
+      createUserWithSignupForm(signupFormData).then(function (_result) {
+        if (!_result.success && _result.message.startsWith('The email')) {
+          setSignupFormErrors((prevSignupFormErrors) => ({
+            ...prevSignupFormErrors,
+            email: _result.message,
+          }));
+        } else {
+          router.push('/');
+        }
       });
     }
   };
@@ -181,7 +181,9 @@ export default function SignupForm() {
             onBlur={validateForm}
           ></input>
         </div>
-        {signupFormErrors.confirmPassword && <div>{signupFormErrors.confirmPassword}</div>}
+        {signupFormErrors.confirmPassword && (
+          <div>{signupFormErrors.confirmPassword}</div>
+        )}
         <button type="submit">Continue</button>
       </form>
     </div>

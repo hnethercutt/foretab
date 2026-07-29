@@ -8,7 +8,7 @@ import Header from '@/components/header';
 const dmSans = DM_Sans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-dm-sans'
+  variable: '--font-dm-sans',
 });
 
 export default function RootLayout({
@@ -21,9 +21,11 @@ export default function RootLayout({
       <body className={`${dmSans.variable}`}>
         <LoadingProvider>
           <AuthProvider>
-            <header><Header /></header>
+            <header>
+              <Header />
+            </header>
             <LoadingSpinner />
-            { children }
+            {children}
           </AuthProvider>
         </LoadingProvider>
       </body>

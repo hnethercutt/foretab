@@ -1,12 +1,12 @@
 export type SignupFormData = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-}
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export type SigninFormData = {
-    email: string;
-    password: string;
-}
+  email: string;
+  password: string;
+};
