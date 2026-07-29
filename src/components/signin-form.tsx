@@ -5,10 +5,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Tooltip } from '@mui/material';
 import { SigninFormData } from '@/types/auth';
 import { userSignin } from '@/services/user-service';
+import { useLoading } from '@/hooks/use-loading';
 import _ from 'lodash';
 
 export default function SignupForm() {
   const router = useRouter();
+  const { withLoading } = useLoading();
 
   const [signinFormData, setSigninFormData] = useState<SigninFormData>({
     email: '',
@@ -42,13 +44,12 @@ export default function SignupForm() {
 
   const continueBtnClicked = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    userSignin(signinFormData).then(function(_result) {
-        if(!_result.success) {
-          setSigninFormError(_result.message);
-        } else {
-          router.push('/');
-        }
-    });
+    let result = await withLoading(() => userSignin(signinFormData));
+    if(result.success) {
+      router.push('/');
+    } else {
+      setSigninFormError(result.message);
+    }
   };
 
   return (
