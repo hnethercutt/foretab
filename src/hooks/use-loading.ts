@@ -14,5 +14,14 @@ export function useLoading() {
         }
     };
 
-    return { ...loading, withLoading };
+    // For using the loading state without waiting on a promise to resolve
+    const startLoading = function() {
+        loading.start();
+    };
+
+    const stopLoading = function() {
+        loading.stop();
+    };
+
+    return { ...loading, withLoading, startLoading, stopLoading };
 }
