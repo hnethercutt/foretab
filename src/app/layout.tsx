@@ -1,7 +1,9 @@
 import './globals.css';
 import { DM_Sans } from 'next/font/google';
 import { LoadingProvider } from '@/context/loading-context';
+import { AuthProvider } from '@/context/auth-context';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import Header from '@/components/header';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -18,9 +20,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${dmSans.variable}`}>
         <LoadingProvider>
-        <header>Foretab</header>
-          <LoadingSpinner />
-          { children }
+          <AuthProvider>
+            <header><Header /></header>
+            <LoadingSpinner />
+            { children }
+          </AuthProvider>
         </LoadingProvider>
       </body>
     </html>

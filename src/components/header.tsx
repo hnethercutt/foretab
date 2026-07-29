@@ -1,16 +1,11 @@
 'use client'
 import { userSignout } from '@/services/user-service';
 import { useAuth } from '@/context/auth-context';
-import { useLoading } from '@/hooks/use-loading';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
-   const router = useRouter();
-    const { withLoading } = useLoading();
-
-    const currentUser = async() => {
-      return await withLoading(async () => useAuth());
-    }
+  const router = useRouter();
+  const currentUser = useAuth();
 
   function handleLogout() {
     userSignout().then(function(_result) {
@@ -24,7 +19,7 @@ export default function Header() {
   return (
     <div>
         <p>Foretab</p>
-        {currentUser() !== null ? (
+        {currentUser !== null ? (
             <div><button onClick={handleLogout}>log out</button></div>
         ) : (
             <div>
