@@ -1,6 +1,6 @@
 import { BacklogTaskItem } from '@/types/tasks';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, DocumentData } from 'firebase/firestore';
 import _ from 'lodash';
 
 export async function getUserBacklogItems(accountId: string): Promise<Array<BacklogTaskItem>> {
@@ -15,7 +15,7 @@ export async function getUserBacklogItems(accountId: string): Promise<Array<Back
   }));
 
   // Keep the list organized for display. Firestore auto sorts alphabetically by ID
-  backlogItems = _.orderBy(backlogItems, ['index'], ['desc']);
+  backlogItems = _.orderBy(backlogItems, ['index'], ['asc']);
 
   return backlogItems;
 }
@@ -53,4 +53,48 @@ function updateBacklogTaskCount(accountId: string, newTaskCount: number) {
     updateDoc(doc(db, 'backlog', accountId), {
         taskCount: newTaskCount
     });
+}
+
+export async function swapBacklogItemIndexes(accountId: string, initialIndex: number, newIndex: number) {
+  let backlogSnapshot = await getDocs(
+    collection(db, 'backlog', accountId, 'tasks')
+  );
+
+  let backlogItems = backlogSnapshot.docs.map((doc) => ({
+    ...doc.data()
+  }));
+
+  let itemsToMoveUp, itemsToMoveDown: Array<DocumentData> = [],
+      draggedItem: DocumentData;
+
+  draggedItem = _.filter(backlogItems, function(_backlogItem) {
+    return _backlogItem.index === initialIndex;
+  });
+
+
+  if (initialIndex < newIndex) {
+    itemsToMoveUp = _.filter(backlogItems, function(_backlogItem) {
+      return _backlogItem.index > initialIndex && _backlogItem.index <= newIndex;
+    });
+
+    _.forEach(itemsToMoveUp, function(_item) {
+      updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
+        index: _item.index - 1
+      });
+    });
+  } else if (initialIndex > newIndex) {
+    itemsToMoveDown = _.filter(backlogItems, function(_backlogItem) {
+      return _backlogItem.index < initialIndex && _backlogItem.index >= newIndex;
+    });
+
+    _.forEach(itemsToMoveDown, function(_item) {
+      updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
+        index: _item.index + 1
+      })
+    });
+  }
+
+  updateDoc(doc(db, 'backlog', accountId, 'tasks', draggedItem[0].id), {
+    index: newIndex
+  });
 }
