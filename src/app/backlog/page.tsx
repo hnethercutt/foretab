@@ -23,10 +23,10 @@ export default function Backlog() {
   const [input, setInput] = useState<string>('');
 
   // Dynamically add new items to the backlog by just hitting enter in the input field
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       if (currentUser) {
-        createNewBacklogItem(currentUser.accountId, input);
+        await createNewBacklogItem(currentUser.accountId, input);
         getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
           setBacklogItems(_backlogItems);
           setInput('');
