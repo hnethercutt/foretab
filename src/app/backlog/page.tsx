@@ -27,8 +27,11 @@ export default function Backlog() {
     if (e.key === 'Enter') {
       if (currentUser) {
         createNewBacklogItem(currentUser.accountId, input);
+        getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
+          setBacklogItems(_backlogItems);
+          setInput('');
+        });
       }
-      setInput('');
     }
   };
 
