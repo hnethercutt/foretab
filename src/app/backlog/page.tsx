@@ -9,24 +9,11 @@ import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
 import { Trash2Icon } from 'lucide-react';
 import styles from './backlog.module.css';
 
-function Sortable({ id, index }: { id: string; index: number }) {
-  const [element, setElement] = useState<Element | null>(null);
-  const handleRef = useRef<HTMLButtonElement | null>(null);
-    const { isDragging } = useSortable({ id, index, element, handle: handleRef });
-
-    return (
-        <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
-          {id}
-          <button ref={handleRef} className={styles.handle} />
-        </ListItem>
-    )
-}
-
 export default function Backlog() {
   const currentUser = useAuth();
   const [backlogItems, setBacklogItems] = useState<Array<BacklogTaskItem>>([]);
 
-  if (currentUser) {
+  if (currentUser && backlogItems.length === 0) {
     // Display all items currently in the users backlog
     getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
       setBacklogItems(_backlogItems);
@@ -45,6 +32,20 @@ export default function Backlog() {
     }
   };
 
+  function Sortable({ id, index }: { id: string; index: number }) {
+    const [element, setElement] = useState<Element | null>(null);
+    const handleRef = useRef<HTMLButtonElement | null>(null);
+    const { isDragging } = useSortable({ id, index, element, handle: handleRef });
+
+    return (
+        <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
+          {id}
+          <button ref={handleRef} className={styles.handle} />
+          <button id={index.toString()} onClick={deleteTaskItem}><Trash2Icon /></button>
+        </ListItem>
+    )
+  }
+
   function updateItemIndex(e: DragEndEvent) {
     if(e.canceled) { return };
     const {source} = e.operation;
@@ -57,7 +58,9 @@ export default function Backlog() {
 
   function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
     if(currentUser) {
-      deleteBacklogItem(currentUser.accountId, e.currentTarget.id);
+      let index = Number(e.currentTarget.id);
+      deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
+      setBacklogItems(prevBacklogItems => prevBacklogItems.filter(backlogItem => backlogItem.id !== backlogItems[index].id));
     }
   }
 
@@ -74,10 +77,7 @@ export default function Backlog() {
         <DragDropProvider onDragEnd={updateItemIndex}>
           <List className={styles.list}>
             {backlogItems.map((item, index) => (
-              <div key={item.id}>
-                <Sortable id={item.description} index={index} />
-                <button id={item.id} onClick={deleteTaskItem}><Trash2Icon /></button>
-              </div>
+              <Sortable key={item.id} id={item.description} index={index} />
             ))}
           </List>
         </DragDropProvider>
