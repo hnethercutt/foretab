@@ -1,6 +1,6 @@
 import { BacklogTaskItem } from '@/types/tasks';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, DocumentData } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, DocumentData, deleteDoc } from 'firebase/firestore';
 import _ from 'lodash';
 
 export async function getUserBacklogItems(accountId: string): Promise<Array<BacklogTaskItem>> {
@@ -97,4 +97,39 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
   updateDoc(doc(db, 'backlog', accountId, 'tasks', draggedItem[0].id), {
     index: newIndex
   });
+}
+
+export async function deleteBacklogItem(accountId: string, itemId: string) {
+  let backlogSnapshot = await getDocs(
+    collection(db, 'backlog', accountId, 'tasks')
+  );
+
+  let backlogItems = backlogSnapshot.docs.map((doc) => ({
+    ...doc.data()
+  }));
+
+  let taskCount = await getBacklogTaskCount(accountId);
+
+  let itemsToMoveUp, itemsToMoveDown: Array<DocumentData> = [],
+      itemToDelete: DocumentData;
+
+  itemToDelete = _.filter(backlogItems, function(_backlogItem) {
+    return _backlogItem.id === itemId;
+  });
+
+
+  if(itemToDelete[0].index !== taskCount - 1) {
+    itemsToMoveUp = _.filter(backlogItems, function(_backlogItem) {
+      return _backlogItem.index > itemToDelete[0].index;
+    });
+
+    _.forEach(itemsToMoveUp, function(_item) {
+      updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
+        index: _item.index - 1
+      });
+    });
+  }
+
+  await deleteDoc(doc(db, 'backlog', accountId, 'tasks', itemId));
+  updateBacklogTaskCount(accountId, taskCount - 1);
 }

@@ -1,11 +1,12 @@
 'use client';
 import { Box, List, ListItem, TextField } from '@mui/material';
 import { useRef, useState } from 'react';
-import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes } from '@/services/tasks-service';
+import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem } from '@/services/tasks-service';
 import { useAuth } from '@/context/auth-context';
 import { BacklogTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
+import { Trash2Icon } from 'lucide-react';
 import styles from './backlog.module.css';
 
 function Sortable({ id, index }: { id: string; index: number }) {
@@ -54,6 +55,12 @@ export default function Backlog() {
     }
   }
 
+  function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
+    if(currentUser) {
+      deleteBacklogItem(currentUser.accountId, e.currentTarget.id);
+    }
+  }
+
   return (
     <div>
       <Box
@@ -67,7 +74,10 @@ export default function Backlog() {
         <DragDropProvider onDragEnd={updateItemIndex}>
           <List className={styles.list}>
             {backlogItems.map((item, index) => (
-              <Sortable key={item.id} id={item.description} index={index} />
+              <div key={item.id}>
+                <Sortable id={item.description} index={index} />
+                <button id={item.id} onClick={deleteTaskItem}><Trash2Icon /></button>
+              </div>
             ))}
           </List>
         </DragDropProvider>
