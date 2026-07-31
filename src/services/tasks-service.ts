@@ -3,7 +3,9 @@ import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, DocumentData, deleteDoc } from 'firebase/firestore';
 import _ from 'lodash';
 
-export async function getUserBacklogItems(accountId: string): Promise<Array<BacklogTaskItem>> {
+export async function getUserBacklogItems(
+  accountId: string
+): Promise<Array<BacklogTaskItem>> {
   // Fetch the users entire backlog
   let backlogSnapshot = await getDocs(
     collection(db, 'backlog', accountId, 'tasks')
@@ -39,20 +41,20 @@ export async function createNewBacklogItem(accountId: string, newItemDescription
 }
 
 async function getBacklogTaskCount(accountId: string): Promise<number> {
-    let backlogTaskCount = -1;
-    let backlogSnapshot = await getDoc(doc(db, 'backlog', accountId));
-    if(backlogSnapshot.data()) {
-        let backlogData = backlogSnapshot.data();
-        backlogTaskCount = backlogData?.taskCount;
-    }
+  let backlogTaskCount = -1;
+  let backlogSnapshot = await getDoc(doc(db, 'backlog', accountId));
+  if (backlogSnapshot.data()) {
+    let backlogData = backlogSnapshot.data();
+    backlogTaskCount = backlogData?.taskCount;
+  }
 
-    return backlogTaskCount;
+  return backlogTaskCount;
 }
 
 function updateBacklogTaskCount(accountId: string, newTaskCount: number) {
-    updateDoc(doc(db, 'backlog', accountId), {
-        taskCount: newTaskCount
-    });
+  updateDoc(doc(db, 'backlog', accountId), {
+    taskCount: newTaskCount,
+  });
 }
 
 export async function swapBacklogItemIndexes(accountId: string, initialIndex: number, newIndex: number) {
@@ -61,41 +63,40 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
   );
 
   let backlogItems = backlogSnapshot.docs.map((doc) => ({
-    ...doc.data()
+    ...doc.data(),
   }));
 
   let itemsToMoveUp, itemsToMoveDown: Array<DocumentData> = [],
       draggedItem: DocumentData;
 
-  draggedItem = _.filter(backlogItems, function(_backlogItem) {
+  draggedItem = _.filter(backlogItems, function (_backlogItem) {
     return _backlogItem.index === initialIndex;
   });
 
-
   if (initialIndex < newIndex) {
-    itemsToMoveUp = _.filter(backlogItems, function(_backlogItem) {
+    itemsToMoveUp = _.filter(backlogItems, function (_backlogItem) {
       return _backlogItem.index > initialIndex && _backlogItem.index <= newIndex;
     });
 
-    _.forEach(itemsToMoveUp, function(_item) {
+    _.forEach(itemsToMoveUp, function (_item) {
       updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
-        index: _item.index - 1
+        index: _item.index - 1,
       });
     });
   } else if (initialIndex > newIndex) {
-    itemsToMoveDown = _.filter(backlogItems, function(_backlogItem) {
+    itemsToMoveDown = _.filter(backlogItems, function (_backlogItem) {
       return _backlogItem.index < initialIndex && _backlogItem.index >= newIndex;
     });
 
-    _.forEach(itemsToMoveDown, function(_item) {
+    _.forEach(itemsToMoveDown, function (_item) {
       updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
-        index: _item.index + 1
-      })
+        index: _item.index + 1,
+      });
     });
   }
 
   updateDoc(doc(db, 'backlog', accountId, 'tasks', draggedItem[0].id), {
-    index: newIndex
+    index: newIndex,
   });
 }
 
@@ -105,27 +106,26 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
   );
 
   let backlogItems = backlogSnapshot.docs.map((doc) => ({
-    ...doc.data()
+    ...doc.data(),
   }));
 
   let taskCount = await getBacklogTaskCount(accountId);
 
   let itemsToMoveUp: Array<DocumentData> = [],
-      itemToDelete: DocumentData;
+    itemToDelete: DocumentData;
 
-  itemToDelete = _.filter(backlogItems, function(_backlogItem) {
+  itemToDelete = _.filter(backlogItems, function (_backlogItem) {
     return _backlogItem.id === itemId;
   });
 
-
-  if(itemToDelete[0].index !== taskCount - 1) {
-    itemsToMoveUp = _.filter(backlogItems, function(_backlogItem) {
+  if (itemToDelete[0].index !== taskCount - 1) {
+    itemsToMoveUp = _.filter(backlogItems, function (_backlogItem) {
       return _backlogItem.index > itemToDelete[0].index;
     });
 
-    _.forEach(itemsToMoveUp, function(_item) {
+    _.forEach(itemsToMoveUp, function (_item) {
       updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
-        index: _item.index - 1
+        index: _item.index - 1,
       });
     });
   }

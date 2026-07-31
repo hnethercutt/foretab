@@ -1,7 +1,7 @@
 'use client';
 import { Box, List, ListItem, TextField } from '@mui/material';
 import { useRef, useState } from 'react';
-import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem } from '@/services/tasks-service';
+import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem,} from '@/services/tasks-service';
 import { useAuth } from '@/context/auth-context';
 import { BacklogTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
@@ -28,9 +28,10 @@ export default function Backlog() {
       if (currentUser) {
         await createNewBacklogItem(currentUser.accountId, input);
         getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
-          setBacklogItems(_backlogItems);
-          setInput('');
-        });
+            setBacklogItems(_backlogItems);
+            setInput('');
+          }
+        );
       }
     }
   };
@@ -41,29 +42,37 @@ export default function Backlog() {
     const { isDragging } = useSortable({ id, index, element, handle: handleRef });
 
     return (
-        <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
-          {id}
-          <button ref={handleRef} className={styles.handle} />
-          <button id={index.toString()} onClick={deleteTaskItem}><Trash2Icon /></button>
-        </ListItem>
-    )
+      <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
+        {id}
+        <button ref={handleRef} className={styles.handle} />
+        <button id={index.toString()} onClick={deleteTaskItem}>
+          <Trash2Icon />
+        </button>
+      </ListItem>
+    );
   }
 
   function updateItemIndex(e: DragEndEvent) {
-    if(e.canceled) { return };
-    const {source} = e.operation;
+    if (e.canceled) {
+      return;
+    }
+    const { source } = e.operation;
 
-    if(isSortable(source) && currentUser) {
-      const {initialIndex, index} = source;
+    if (isSortable(source) && currentUser) {
+      const { initialIndex, index } = source;
       swapBacklogItemIndexes(currentUser.accountId, initialIndex, index);
     }
   }
 
   async function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
-    if(currentUser) {
+    if (currentUser) {
       let index = Number(e.currentTarget.id);
       await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
-      setBacklogItems(prevBacklogItems => prevBacklogItems.filter(backlogItem => backlogItem.id !== backlogItems[index].id));
+      setBacklogItems((prevBacklogItems) =>
+        prevBacklogItems.filter(
+          (backlogItem) => backlogItem.id !== backlogItems[index].id
+        )
+      );
     }
   }
 
