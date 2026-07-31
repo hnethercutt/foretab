@@ -110,7 +110,7 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
 
   let taskCount = await getBacklogTaskCount(accountId);
 
-  let itemsToMoveUp, itemsToMoveDown: Array<DocumentData> = [],
+  let itemsToMoveUp: Array<DocumentData> = [],
       itemToDelete: DocumentData;
 
   itemToDelete = _.filter(backlogItems, function(_backlogItem) {
