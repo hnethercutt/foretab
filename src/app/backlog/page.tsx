@@ -59,10 +59,10 @@ export default function Backlog() {
     }
   }
 
-  function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
+  async function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
     if(currentUser) {
       let index = Number(e.currentTarget.id);
-      deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
+      await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
       setBacklogItems(prevBacklogItems => prevBacklogItems.filter(backlogItem => backlogItem.id !== backlogItems[index].id));
     }
   }
