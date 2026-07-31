@@ -1,12 +1,12 @@
 'use client';
-import { Box, List, ListItem, TextField } from '@mui/material';
+import { Box, List, ListItem, ListItemText, ListItemIcon, TextField, Paper, MenuList, MenuItem } from '@mui/material';
 import { useRef, useState } from 'react';
 import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem,} from '@/services/tasks-service';
 import { useAuth } from '@/context/auth-context';
 import { BacklogTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
-import { Trash2Icon } from 'lucide-react';
+import { Ellipsis, Trash2, SquarePen } from 'lucide-react';
 import styles from './backlog.module.css';
 
 export default function Backlog() {
@@ -19,6 +19,51 @@ export default function Backlog() {
     getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
       setBacklogItems(_backlogItems);
     });
+  }
+
+  // For toggling show/hide options menu for a task item
+  const [showOptions, setShowOptions] = useState<boolean>(false);
+  // So we know which options menu to show/set to index of corresponding task item
+  const [showOptionsIndex, setShowOptionsIndex] = useState<number>(-1);
+
+  // Render the backlog items in a sortable list
+  function Sortable({ id, index }: { id: string; index: number }) {
+    const [element, setElement] = useState<Element | null>(null);
+    const handleRef = useRef<HTMLButtonElement | null>(null);
+    const { isDragging } = useSortable({ id, index, element, handle: handleRef });
+
+    return (
+      <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
+        {id}
+        <button ref={handleRef} className={styles.handle} />
+        <div>
+          <button id={index.toString()} onClick={(() => {
+            setShowOptions(!showOptions);
+            setShowOptionsIndex(index);
+          })}>
+            <Ellipsis />
+          </button>
+          {showOptions && showOptionsIndex === index && (
+            <Paper sx={{ width: 275, maxWidth: '100%' }}>
+              <MenuList>
+                <MenuItem>
+                  <ListItemIcon>
+                    <SquarePen />
+                  </ListItemIcon>
+                  <ListItemText>Edit</ListItemText>
+                </MenuItem>
+                <MenuItem id={index.toString()} onClick={deleteTaskItem}>
+                  <ListItemIcon>
+                    <Trash2 />
+                  </ListItemIcon>
+                  <ListItemText>Delete</ListItemText>
+                </MenuItem>
+              </MenuList>
+            </Paper>
+          )}
+        </div>
+      </ListItem>
+    );
   }
 
   const [input, setInput] = useState<string>('');
@@ -39,23 +84,6 @@ export default function Backlog() {
     }
   };
 
-  // Render the backlog items in a sortable list
-  function Sortable({ id, index }: { id: string; index: number }) {
-    const [element, setElement] = useState<Element | null>(null);
-    const handleRef = useRef<HTMLButtonElement | null>(null);
-    const { isDragging } = useSortable({ id, index, element, handle: handleRef });
-
-    return (
-      <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
-        {id}
-        <button ref={handleRef} className={styles.handle} />
-        <button id={index.toString()} onClick={deleteTaskItem}>
-          <Trash2Icon />
-        </button>
-      </ListItem>
-    );
-  }
-
   // Handle saving the new backlog list order after an item is moved
   function updateItemIndex(e: DragEndEvent) {
     if (e.canceled) {
@@ -69,7 +97,11 @@ export default function Backlog() {
     }
   }
 
-  async function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
+  async function deleteTaskItem(e: React.MouseEvent<HTMLElement>) {
+    // Close out the options menu since the button was clicked from inside of it
+    setShowOptions(false);
+    setShowOptionsIndex(-1);
+
     if (currentUser) {
       let index = Number(e.currentTarget.id);
       await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
