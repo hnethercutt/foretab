@@ -13,6 +13,7 @@ export default function Backlog() {
   const currentUser = useAuth();
   const [backlogItems, setBacklogItems] = useState<Array<BacklogTaskItem>>([]);
 
+  // Blocking this from dynamically updating to prevent double rendering after sorting items
   if (currentUser && backlogItems.length === 0) {
     // Display all items currently in the users backlog
     getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
@@ -27,8 +28,10 @@ export default function Backlog() {
     if (e.key === 'Enter') {
       if (currentUser) {
         await createNewBacklogItem(currentUser.accountId, input);
+        // Since I blocked dynamic updating, will need to refetch when a new item is added to show that dynamically
         getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
             setBacklogItems(_backlogItems);
+            // And clear out the text field to make life easier :)
             setInput('');
           }
         );
@@ -36,6 +39,7 @@ export default function Backlog() {
     }
   };
 
+  // Render the backlog items in a sortable list
   function Sortable({ id, index }: { id: string; index: number }) {
     const [element, setElement] = useState<Element | null>(null);
     const handleRef = useRef<HTMLButtonElement | null>(null);
@@ -45,13 +49,14 @@ export default function Backlog() {
       <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
         {id}
         <button ref={handleRef} className={styles.handle} />
-        <button id={index.toString()} onClick={deleteTaskItem}>
+        <button id={backlogItems[index].id} onClick={deleteTaskItem}>
           <Trash2Icon />
         </button>
       </ListItem>
     );
   }
 
+  // Handle saving the new backlog list order after an item is moved
   function updateItemIndex(e: DragEndEvent) {
     if (e.canceled) {
       return;
@@ -66,11 +71,11 @@ export default function Backlog() {
 
   async function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
     if (currentUser) {
-      let index = Number(e.currentTarget.id);
-      await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
+      await deleteBacklogItem(currentUser.accountId, e.currentTarget.id);
+      // Again since db updates won't trigger rerendering of the list, need to delete the item from the state array as well
       setBacklogItems((prevBacklogItems) =>
         prevBacklogItems.filter(
-          (backlogItem) => backlogItem.id !== backlogItems[index].id
+          (backlogItem) => backlogItem.id !== e.currentTarget.id
         )
       );
     }

@@ -3,13 +3,9 @@ import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, DocumentData, deleteDoc } from 'firebase/firestore';
 import _ from 'lodash';
 
-export async function getUserBacklogItems(
-  accountId: string
-): Promise<Array<BacklogTaskItem>> {
+export async function getUserBacklogItems(accountId: string): Promise<Array<BacklogTaskItem>> {
   // Fetch the users entire backlog
-  let backlogSnapshot = await getDocs(
-    collection(db, 'backlog', accountId, 'tasks')
-  );
+  let backlogSnapshot = await getDocs(collection(db, 'backlog', accountId, 'tasks'));
 
   // And convert into the return object array
   let backlogItems = backlogSnapshot.docs.map((doc) => ({
@@ -17,6 +13,7 @@ export async function getUserBacklogItems(
   }));
 
   // Keep the list organized for display. Firestore auto sorts alphabetically by ID
+  // Default is 'custom order' they're auto added in date added order, but index changes when users manually reorder the items
   backlogItems = _.orderBy(backlogItems, ['index'], ['asc']);
 
   return backlogItems;
@@ -57,6 +54,7 @@ function updateBacklogTaskCount(accountId: string, newTaskCount: number) {
   });
 }
 
+// For handling user sorting items
 export async function swapBacklogItemIndexes(accountId: string, initialIndex: number, newIndex: number) {
   let backlogSnapshot = await getDocs(
     collection(db, 'backlog', accountId, 'tasks')
@@ -69,20 +67,24 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
   let itemsToMoveUp, itemsToMoveDown: Array<DocumentData> = [],
       draggedItem: DocumentData;
 
+  // The item the user moved
   draggedItem = _.filter(backlogItems, function (_backlogItem) {
     return _backlogItem.index === initialIndex;
   });
 
+  // The item is moving farther up the list, which means the index is decreasing
   if (initialIndex < newIndex) {
     itemsToMoveUp = _.filter(backlogItems, function (_backlogItem) {
       return _backlogItem.index > initialIndex && _backlogItem.index <= newIndex;
     });
 
+    // Want to make sure any items that are moved as a result of moving the dragged one are updated
     _.forEach(itemsToMoveUp, function (_item) {
       updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
         index: _item.index - 1,
       });
     });
+  // The item is moving farther down/index increasing
   } else if (initialIndex > newIndex) {
     itemsToMoveDown = _.filter(backlogItems, function (_backlogItem) {
       return _backlogItem.index < initialIndex && _backlogItem.index >= newIndex;
@@ -95,6 +97,7 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
     });
   }
 
+  // Finally update the index of the dragged item, so now the index order in the db matches the view
   updateDoc(doc(db, 'backlog', accountId, 'tasks', draggedItem[0].id), {
     index: newIndex,
   });
@@ -112,13 +115,15 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
   let taskCount = await getBacklogTaskCount(accountId);
 
   let itemsToMoveUp: Array<DocumentData> = [],
-    itemToDelete: DocumentData;
+      itemToDelete: DocumentData;
 
   itemToDelete = _.filter(backlogItems, function (_backlogItem) {
     return _backlogItem.id === itemId;
   });
 
+  // No need to check and update other items if the one being deleted was the only one on the account
   if (itemToDelete[0].index !== taskCount - 1) {
+    // Any item below the deleted one must be updated
     itemsToMoveUp = _.filter(backlogItems, function (_backlogItem) {
       return _backlogItem.index > itemToDelete[0].index;
     });
@@ -130,6 +135,7 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
     });
   }
 
+  // Finally delete the item and update the count
   await deleteDoc(doc(db, 'backlog', accountId, 'tasks', itemId));
   updateBacklogTaskCount(accountId, taskCount - 1);
 }
