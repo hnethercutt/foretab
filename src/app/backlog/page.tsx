@@ -49,7 +49,7 @@ export default function Backlog() {
       <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
         {id}
         <button ref={handleRef} className={styles.handle} />
-        <button id={backlogItems[index].id} onClick={deleteTaskItem}>
+        <button id={index.toString()} onClick={deleteTaskItem}>
           <Trash2Icon />
         </button>
       </ListItem>
@@ -71,11 +71,12 @@ export default function Backlog() {
 
   async function deleteTaskItem(e: React.MouseEvent<HTMLButtonElement>) {
     if (currentUser) {
-      await deleteBacklogItem(currentUser.accountId, e.currentTarget.id);
+      let index = Number(e.currentTarget.id);
+      await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
       // Again since db updates won't trigger rerendering of the list, need to delete the item from the state array as well
       setBacklogItems((prevBacklogItems) =>
         prevBacklogItems.filter(
-          (backlogItem) => backlogItem.id !== e.currentTarget.id
+          (backlogItem) => backlogItem.id !== backlogItems[index].id
         )
       );
     }
