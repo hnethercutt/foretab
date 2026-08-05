@@ -54,6 +54,12 @@ function updateBacklogTaskCount(accountId: string, newTaskCount: number) {
   });
 }
 
+export async function updateBacklogItemDescription(accountId: string, itemId: string, newDescription: string) {
+  await updateDoc(doc(db, 'backlog', accountId, 'tasks', itemId), {
+    description: newDescription
+  });
+}
+
 // For handling user sorting items
 export async function swapBacklogItemIndexes(accountId: string, initialIndex: number, newIndex: number) {
   let backlogSnapshot = await getDocs(

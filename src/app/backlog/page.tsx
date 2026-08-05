@@ -1,7 +1,7 @@
 'use client';
 import { Box, List, ListItem, ListItemText, ListItemIcon, TextField, Paper, MenuList, MenuItem } from '@mui/material';
 import { useRef, useState } from 'react';
-import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem,} from '@/services/tasks-service';
+import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem, updateBacklogItemDescription } from '@/services/tasks-service';
 import { useAuth } from '@/context/auth-context';
 import { BacklogTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
@@ -26,6 +26,13 @@ export default function Backlog() {
   // So we know which options menu to show/set to index of corresponding task item
   const [showOptionsIndex, setShowOptionsIndex] = useState<number>(-1);
 
+  // For toggling edit mode
+  const [editMode, setEditMode] = useState<boolean>(false);
+  // So we know which item is being edited
+  const [editModeIndex, setEditModeIndex] = useState<number>(-1);
+  // Used to keep track of the text in the edit field.
+  const editTextRef = useRef<HTMLInputElement | null>(null);
+
   // Render the backlog items in a sortable list
   function Sortable({ id, index }: { id: string; index: number }) {
     const [element, setElement] = useState<Element | null>(null);
@@ -34,19 +41,38 @@ export default function Backlog() {
 
     return (
       <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
-        {id}
+        {!editMode && <ListItemText>{id}</ListItemText>}
+        {/* Only show edit mode for the selected item */}
+        {editMode && editModeIndex === index && (
+          <TextField
+            defaultValue={backlogItems[index].description}
+            inputRef={editTextRef}
+            variant="standard"
+            onKeyDown={handleEditTaskItem}
+          />
+        )}
         <button ref={handleRef} className={styles.handle} />
         <div>
-          <button id={index.toString()} onClick={(() => {
-            setShowOptions(!showOptions);
-            setShowOptionsIndex(index);
-          })}>
+          <button
+            id={index.toString()}
+            onClick={() => {
+              setShowOptions(!showOptions);
+              setShowOptionsIndex(index);
+            }}
+          >
             <Ellipsis />
           </button>
           {showOptions && showOptionsIndex === index && (
             <Paper sx={{ width: 275, maxWidth: '100%' }}>
               <MenuList>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setEditMode(true);
+                    setEditModeIndex(index);
+                    setShowOptions(false);
+                    setShowOptionsIndex(-1);
+                  }}
+                >
                   <ListItemIcon>
                     <SquarePen />
                   </ListItemIcon>
@@ -65,6 +91,30 @@ export default function Backlog() {
       </ListItem>
     );
   }
+
+  const handleEditTaskItem = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && currentUser) {
+      const updatedDescription = editTextRef.current?.value ?? '';
+
+      // Need to go ahead and update the state so that the new description displays automatically
+      setBacklogItems((prevBacklogItems) =>
+        prevBacklogItems.map((backlogItem) =>
+          // Only updating the item that was edited
+          backlogItem.index === editModeIndex ? {
+              ...backlogItem,
+              description: updatedDescription,
+            }
+          : backlogItem
+        )
+      );
+
+      // Turn off/reset edit mode so the view swaps back to a list item
+      setEditMode(false);
+      setEditModeIndex(-1);
+      // And update the database with the new description
+      await updateBacklogItemDescription(currentUser.accountId, backlogItems[editModeIndex].id, updatedDescription);
+    }
+  };
 
   const [input, setInput] = useState<string>('');
 
