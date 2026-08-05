@@ -6,7 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { BacklogTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
-import { Ellipsis, Trash2, SquarePen } from 'lucide-react';
+import { Ellipsis, Trash2, PencilLine } from 'lucide-react';
 import styles from './backlog.module.css';
 
 export default function Backlog() {
@@ -74,9 +74,9 @@ export default function Backlog() {
                   }}
                 >
                   <ListItemIcon>
-                    <SquarePen />
+                    <PencilLine />
                   </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
+                  <ListItemText>Rename</ListItemText>
                 </MenuItem>
                 <MenuItem id={index.toString()} onClick={deleteTaskItem}>
                   <ListItemIcon>
