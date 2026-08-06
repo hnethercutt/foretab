@@ -14,6 +14,9 @@ export async function getUserBacklogItems(accountId: string): Promise<Array<Back
 
   // Keep the list organized for display. Firestore auto sorts alphabetically by ID
   // Default is 'custom order' they're auto added in date added order, but index changes when users manually reorder the items
+  backlogItems = _.filter(backlogItems, function(_backlogItem) {
+    return _backlogItem.index >= 0;
+  });
   backlogItems = _.orderBy(backlogItems, ['index'], ['asc']);
 
   return backlogItems;
@@ -144,4 +147,39 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
   // Finally delete the item and update the count
   await deleteDoc(doc(db, 'backlog', accountId, 'tasks', itemId));
   updateBacklogTaskCount(accountId, taskCount - 1);
+}
+
+export async function moveBacklogItemToForetab(accountId: string, itemId: string, description: string) {
+  let taskCount = await getForetabTaskCount(accountId);
+  let newDocRef = doc(collection(db, 'foretab', accountId, 'tasks'));
+
+  await setDoc(newDocRef, {
+    dateAdded: serverTimestamp(),
+    description: description,
+    id: itemId,
+    index: 0,
+    isComplete: false,
+    status: "open",
+    tag: ""
+  });
+
+  updateForetabTaskCount(accountId, taskCount + 1);
+}
+
+
+async function getForetabTaskCount(accountId: string): Promise<number> {
+  let foretabTaskCount = -1;
+  let foretabSnapshot = await getDoc(doc(db, 'foretab', accountId));
+  if (foretabSnapshot.data()) {
+    let foretabData = foretabSnapshot.data();
+    foretabTaskCount = foretabData?.taskCount;
+  }
+
+  return foretabTaskCount;
+}
+
+function updateForetabTaskCount(accountId: string, newTaskCount: number) {
+  updateDoc(doc(db, 'foretab', accountId), {
+    taskCount: newTaskCount,
+  });
 }

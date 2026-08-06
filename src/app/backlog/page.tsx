@@ -1,12 +1,12 @@
 'use client';
 import { Box, List, ListItem, ListItemText, ListItemIcon, TextField, Paper, MenuList, MenuItem } from '@mui/material';
 import { useRef, useState } from 'react';
-import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem, updateBacklogItemDescription } from '@/services/tasks-service';
+import { getUserBacklogItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem, updateBacklogItemDescription, moveBacklogItemToForetab } from '@/services/tasks-service';
 import { useAuth } from '@/context/auth-context';
 import { BacklogTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
-import { Ellipsis, Trash2, PencilLine } from 'lucide-react';
+import { Ellipsis, Trash2, PencilLine, SmilePlus } from 'lucide-react';
 import styles from './backlog.module.css';
 
 export default function Backlog() {
@@ -65,6 +65,23 @@ export default function Backlog() {
           {showOptions && showOptionsIndex === index && (
             <Paper sx={{ width: 275, maxWidth: '100%' }}>
               <MenuList>
+                <MenuItem
+                  onClick={async(e: React.MouseEvent<HTMLElement>) => {
+                    if(currentUser) {
+                      await moveBacklogItemToForetab(currentUser.accountId, backlogItems[index].id, backlogItems[index].description);
+                      await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
+                      setBacklogItems((prevBacklogItems) =>
+                        prevBacklogItems.filter(
+                          (backlogItem) => backlogItem.id !== backlogItems[index].id
+                        )
+                      );
+                    }
+                  }}>
+                  <ListItemIcon>
+                    <SmilePlus />
+                  </ListItemIcon>
+                  <ListItemText>Add to your Foretab</ListItemText>
+                </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setEditMode(true);
