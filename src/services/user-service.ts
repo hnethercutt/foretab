@@ -84,9 +84,7 @@ export async function signInWithGoogle(): Promise<{
     });
 }
 
-export async function createUserWithSignupForm(
-  data: SignupFormData
-): Promise<{ success: boolean; message: string }> {
+export async function createUserWithSignupForm(data: SignupFormData): Promise<{ success: boolean; message: string }> {
   return createUserWithEmailAndPassword(auth, data.email, data.password)
     .then(async (_result) => {
       let userSnapshot = await getDoc(doc(db, 'users', _result.user.uid));
@@ -107,9 +105,7 @@ export async function createUserWithSignupForm(
     });
 }
 
-export async function userSignin(
-data: SigninFormData
-): Promise<{ success: boolean; message: string }> {
+export async function userSignin(data: SigninFormData): Promise<{ success: boolean; message: string }> {
   return signInWithEmailAndPassword(auth, data.email, data.password)
     .then(async (_result) => {
       return { success: true, message: 'User successfully signed in.' };

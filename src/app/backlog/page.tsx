@@ -40,7 +40,11 @@ export default function Backlog() {
     const { isDragging } = useSortable({ id, index, element, handle: handleRef });
 
     return (
-      <ListItem ref={setElement} className={styles.item} data-shadow={isDragging || undefined}>
+      <ListItem
+        ref={setElement}
+        className={styles.item}
+        data-shadow={isDragging || undefined}
+      >
         {!editMode && <ListItemText>{id}</ListItemText>}
         {/* Only show edit mode for the selected item */}
         {editMode && editModeIndex === index && (
@@ -66,17 +70,20 @@ export default function Backlog() {
             <Paper sx={{ width: 275, maxWidth: '100%' }}>
               <MenuList>
                 <MenuItem
-                  onClick={async(e: React.MouseEvent<HTMLElement>) => {
-                    if(currentUser) {
+                  onClick={async (e: React.MouseEvent<HTMLElement>) => {
+                    if (currentUser) {
+                      // Move the selected item from the backlog to the foretab
                       await moveBacklogItemToForetab(currentUser.accountId, backlogItems[index].id, backlogItems[index].description);
                       await deleteBacklogItem(currentUser.accountId, backlogItems[index].id);
                       setBacklogItems((prevBacklogItems) =>
                         prevBacklogItems.filter(
-                          (backlogItem) => backlogItem.id !== backlogItems[index].id
+                          (backlogItem) =>
+                            backlogItem.id !== backlogItems[index].id
                         )
                       );
                     }
-                  }}>
+                  }}
+                >
                   <ListItemIcon>
                     <SmilePlus />
                   </ListItemIcon>
@@ -84,6 +91,7 @@ export default function Backlog() {
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
+                    // Enabled editing for the selected item
                     setEditMode(true);
                     setEditModeIndex(index);
                     setShowOptions(false);
@@ -95,6 +103,7 @@ export default function Backlog() {
                   </ListItemIcon>
                   <ListItemText>Rename</ListItemText>
                 </MenuItem>
+                {/* Delete the selected item from the backlog */}
                 <MenuItem id={index.toString()} onClick={deleteTaskItem}>
                   <ListItemIcon>
                     <Trash2 />
@@ -117,11 +126,10 @@ export default function Backlog() {
       setBacklogItems((prevBacklogItems) =>
         prevBacklogItems.map((backlogItem) =>
           // Only updating the item that was edited
-          backlogItem.index === editModeIndex ? {
-              ...backlogItem,
-              description: updatedDescription,
-            }
-          : backlogItem
+          backlogItem.index === editModeIndex? {
+            ...backlogItem,
+            description: updatedDescription,
+          } : backlogItem
         )
       );
 
@@ -141,7 +149,8 @@ export default function Backlog() {
       if (currentUser) {
         await createNewBacklogItem(currentUser.accountId, input);
         // Since I blocked dynamic updating, will need to refetch when a new item is added to show that dynamically
-        getUserBacklogItems(currentUser.accountId).then(function (_backlogItems) {
+        getUserBacklogItems(currentUser.accountId).then(
+          function (_backlogItems) {
             setBacklogItems(_backlogItems);
             // And clear out the text field to make life easier :)
             setInput('');

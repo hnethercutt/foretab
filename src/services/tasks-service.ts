@@ -5,7 +5,9 @@ import _ from 'lodash';
 
 export async function getUserBacklogItems(accountId: string): Promise<Array<BacklogTaskItem>> {
   // Fetch the users entire backlog
-  let backlogSnapshot = await getDocs(collection(db, 'backlog', accountId, 'tasks'));
+  let backlogSnapshot = await getDocs(
+    collection(db, 'backlog', accountId, 'tasks')
+  );
 
   // And convert into the return object array
   let backlogItems = backlogSnapshot.docs.map((doc) => ({
@@ -14,7 +16,7 @@ export async function getUserBacklogItems(accountId: string): Promise<Array<Back
 
   // Keep the list organized for display. Firestore auto sorts alphabetically by ID
   // Default is 'custom order' they're auto added in date added order, but index changes when users manually reorder the items
-  backlogItems = _.filter(backlogItems, function(_backlogItem) {
+  backlogItems = _.filter(backlogItems, function (_backlogItem) {
     return _backlogItem.index >= 0;
   });
   backlogItems = _.orderBy(backlogItems, ['index'], ['asc']);
@@ -59,7 +61,7 @@ function updateBacklogTaskCount(accountId: string, newTaskCount: number) {
 
 export async function updateBacklogItemDescription(accountId: string, itemId: string, newDescription: string) {
   await updateDoc(doc(db, 'backlog', accountId, 'tasks', itemId), {
-    description: newDescription
+    description: newDescription,
   });
 }
 
@@ -73,7 +75,8 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
     ...doc.data(),
   }));
 
-  let itemsToMoveUp, itemsToMoveDown: Array<DocumentData> = [],
+  let itemsToMoveUp,
+      itemsToMoveDown: Array<DocumentData> = [],
       draggedItem: DocumentData;
 
   // The item the user moved
@@ -84,7 +87,9 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
   // The item is moving farther up the list, which means the index is decreasing
   if (initialIndex < newIndex) {
     itemsToMoveUp = _.filter(backlogItems, function (_backlogItem) {
-      return _backlogItem.index > initialIndex && _backlogItem.index <= newIndex;
+      return (
+        _backlogItem.index > initialIndex && _backlogItem.index <= newIndex
+      );
     });
 
     // Want to make sure any items that are moved as a result of moving the dragged one are updated
@@ -93,10 +98,12 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
         index: _item.index - 1,
       });
     });
-  // The item is moving farther down/index increasing
+    // The item is moving farther down/index increasing
   } else if (initialIndex > newIndex) {
     itemsToMoveDown = _.filter(backlogItems, function (_backlogItem) {
-      return _backlogItem.index < initialIndex && _backlogItem.index >= newIndex;
+      return (
+        _backlogItem.index < initialIndex && _backlogItem.index >= newIndex
+      );
     });
 
     _.forEach(itemsToMoveDown, function (_item) {
@@ -124,7 +131,7 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
   let taskCount = await getBacklogTaskCount(accountId);
 
   let itemsToMoveUp: Array<DocumentData> = [],
-      itemToDelete: DocumentData;
+    itemToDelete: DocumentData;
 
   itemToDelete = _.filter(backlogItems, function (_backlogItem) {
     return _backlogItem.id === itemId;
@@ -159,13 +166,12 @@ export async function moveBacklogItemToForetab(accountId: string, itemId: string
     id: itemId,
     index: 0,
     isComplete: false,
-    status: "open",
-    tag: ""
+    status: 'open',
+    tag: '',
   });
 
   updateForetabTaskCount(accountId, taskCount + 1);
 }
-
 
 async function getForetabTaskCount(accountId: string): Promise<number> {
   let foretabTaskCount = -1;
