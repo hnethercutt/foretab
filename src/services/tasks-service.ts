@@ -1,4 +1,4 @@
-import { BacklogTaskItem } from '@/types/tasks';
+import { BacklogTaskItem, ForetabTaskItem } from '@/types/tasks';
 import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, DocumentData, deleteDoc } from 'firebase/firestore';
 import _ from 'lodash';
@@ -164,7 +164,7 @@ export async function moveBacklogItemToForetab(accountId: string, itemId: string
     dateAdded: serverTimestamp(),
     description: description,
     id: itemId,
-    index: 0,
+    index: taskCount,
     isComplete: false,
     status: 'open',
     tag: '',
@@ -188,4 +188,21 @@ function updateForetabTaskCount(accountId: string, newTaskCount: number) {
   updateDoc(doc(db, 'foretab', accountId), {
     taskCount: newTaskCount,
   });
+}
+
+export async function fetchUserForetabItems(accountId: string): Promise<Array<ForetabTaskItem>> {
+  let foretabSnapshot = await getDocs(
+    collection(db, 'foretab', accountId, 'tasks')
+  );
+
+  let foretabItems = foretabSnapshot.docs.map((doc) => ({
+    ...(doc.data() as ForetabTaskItem),
+  }));
+
+  foretabItems = _.filter(foretabItems, function (_backlogItem) {
+    return _backlogItem.index >= 0;
+  });
+  foretabItems = _.orderBy(foretabItems, ['index'], ['asc']);
+
+  return foretabItems;
 }
