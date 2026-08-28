@@ -5,6 +5,7 @@ import { useAuth } from '@/context/auth-context';
 import { useLoading } from '@/hooks/use-loading';
 import { useEffect } from 'react';
 import { Frown, NotebookPen, SmilePlus, AppWindow, Repeat } from 'lucide-react';
+import Foretab from '@/components/home/foretab';
 
 export default function Home() {
   const router = useRouter();
@@ -159,7 +160,7 @@ export default function Home() {
         </div> */}
         </div>
       ) : (
-        <div></div>
+        <div><Foretab /></div>
       )}
     </div>
   );
