@@ -24,7 +24,8 @@ async function createUser(user: User) {
       let tasksRef = collection(backlogRef, 'tasks');
       await addDoc(tasksRef, {
         initialized: true,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        index: -1
       });
     })
   }).then(async () => {
@@ -38,7 +39,8 @@ async function createUser(user: User) {
       let tasksRef = collection(foretabRef, 'tasks');
       await addDoc(tasksRef, {
         initialized: true,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        index: -1
       });
     })
   }).then(async () => {
@@ -49,7 +51,8 @@ async function createUser(user: User) {
       let tasksRef = collection(historyRef, 'tasks');
       await addDoc(tasksRef, {
         initialized: true,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        index: -1
       });
     })
   }).catch((err: FirebaseError) => {
