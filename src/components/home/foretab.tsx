@@ -204,14 +204,6 @@ export default function Foretab() {
           </List>
         </DragDropProvider>
       </Box>
-      <TextField
-        variant="outlined"
-        value={input}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setInput(e.target.value);
-        }}
-        onKeyDown={handleKeyDown}
-      />
     </div>
   );
 }
