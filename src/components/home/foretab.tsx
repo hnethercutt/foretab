@@ -1,16 +1,16 @@
 'use client';
 import { Box, List, ListItem, ListItemText, ListItemIcon, TextField, Paper, MenuList, MenuItem } from '@mui/material';
 import { useRef, useState } from 'react';
-import { fetchUserForetabItems, createNewBacklogItem, swapBacklogItemIndexes, deleteBacklogItem, updateBacklogItemDescription, moveBacklogItemToForetab } from '@/services/tasks-service';
+import { fetchUserForetabItems, swapForetabItemIndexes, deleteForetabItem, updateForetabItemDescription, moveForetabItemToBacklog } from '@/services/tasks-service';
 import { useAuth } from '@/context/auth-context';
-import { BacklogTaskItem } from '@/types/tasks';
+import { ForetabTaskItem } from '@/types/tasks';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
 import { Ellipsis, Trash2, PencilLine, SmilePlus } from 'lucide-react';
 
 export default function Foretab() {
   const currentUser = useAuth();
-  const [foretabItems, setForetabItems] = useState<Array<BacklogTaskItem>>([]);
+  const [foretabItems, setForetabItems] = useState<Array<ForetabTaskItem>>([]);
 
   if (currentUser && foretabItems.length === 0) {
     fetchUserForetabItems(currentUser.accountId).then(function (_foretabItems) {
@@ -30,7 +30,7 @@ export default function Foretab() {
   // Used to keep track of the text in the edit field.
   const editTextRef = useRef<HTMLInputElement | null>(null);
 
-  // Render the backlog items in a sortable list
+  // Render the foretab items in a sortable list
   function Sortable({ id, index }: { id: string; index: number }) {
     const [element, setElement] = useState<Element | null>(null);
     const handleRef = useRef<HTMLButtonElement | null>(null);
@@ -68,9 +68,9 @@ export default function Foretab() {
                 <MenuItem
                   onClick={async (e: React.MouseEvent<HTMLElement>) => {
                     if (currentUser) {
-                      // Move the selected item from the backlog to the foretab
-                      await moveBacklogItemToForetab(currentUser.accountId, foretabItems[index].id, foretabItems[index].description);
-                      await deleteBacklogItem(currentUser.accountId, foretabItems[index].id);
+                      // Move the selected item from their foretab to their backlog
+                      await moveForetabItemToBacklog(currentUser.accountId, foretabItems[index].id, foretabItems[index].description);
+                      await deleteForetabItem(currentUser.accountId, foretabItems[index].id);
                       setForetabItems((prevForetabItems) =>
                         prevForetabItems.filter(
                           (foretabItem) =>
@@ -83,7 +83,7 @@ export default function Foretab() {
                   <ListItemIcon>
                     <SmilePlus />
                   </ListItemIcon>
-                  <ListItemText>Add to your Foretab</ListItemText>
+                  <ListItemText>Add to your Backlog</ListItemText>
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -99,7 +99,7 @@ export default function Foretab() {
                   </ListItemIcon>
                   <ListItemText>Rename</ListItemText>
                 </MenuItem>
-                {/* Delete the selected item from the backlog */}
+                {/* Delete the selected item from the foretab */}
                 <MenuItem id={index.toString()} onClick={deleteTaskItem}>
                   <ListItemIcon>
                     <Trash2 />
@@ -133,30 +133,11 @@ export default function Foretab() {
       setEditMode(false);
       setEditModeIndex(-1);
       // And update the database with the new description
-      await updateBacklogItemDescription(currentUser.accountId, foretabItems[editModeIndex].id, updatedDescription);
+      await updateForetabItemDescription(currentUser.accountId, foretabItems[editModeIndex].id, updatedDescription);
     }
   };
 
-  const [input, setInput] = useState<string>('');
-
-  // Dynamically add new items to the backlog by just hitting enter in the input field
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (currentUser) {
-        await createNewBacklogItem(currentUser.accountId, input);
-        // Since I blocked dynamic updating, will need to refetch when a new item is added to show that dynamically
-        fetchUserForetabItems(currentUser.accountId).then(
-          function (_foretabItems) {
-            setForetabItems(_foretabItems);
-            // And clear out the text field to make life easier :)
-            setInput('');
-          }
-        );
-      }
-    }
-  };
-
-  // Handle saving the new backlog list order after an item is moved
+  // Handle saving the new foretab list order after an item is moved
   function updateItemIndex(e: DragEndEvent) {
     if (e.canceled) {
       return;
@@ -165,7 +146,7 @@ export default function Foretab() {
 
     if (isSortable(source) && currentUser) {
       const { initialIndex, index } = source;
-      swapBacklogItemIndexes(currentUser.accountId, initialIndex, index);
+      swapForetabItemIndexes(currentUser.accountId, initialIndex, index);
     }
   }
 
@@ -176,7 +157,7 @@ export default function Foretab() {
 
     if (currentUser) {
       let index = Number(e.currentTarget.id);
-      await deleteBacklogItem(currentUser.accountId, foretabItems[index].id);
+      await deleteForetabItem(currentUser.accountId, foretabItems[index].id);
       // Again since db updates won't trigger rerendering of the list, need to delete the item from the state array as well
       setForetabItems((prevForetabItems) =>
         prevForetabItems.filter(

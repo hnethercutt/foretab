@@ -65,6 +65,12 @@ export async function updateBacklogItemDescription(accountId: string, itemId: st
   });
 }
 
+export async function updateForetabItemDescription(accountId: string, itemId: string, newDescription: string) {
+  await updateDoc(doc(db, 'foretab', accountId, 'tasks', itemId), {
+    description: newDescription,
+  });
+}
+
 // For handling user sorting items
 export async function swapBacklogItemIndexes(accountId: string, initialIndex: number, newIndex: number) {
   let backlogSnapshot = await getDocs(
@@ -119,6 +125,55 @@ export async function swapBacklogItemIndexes(accountId: string, initialIndex: nu
   });
 }
 
+// For handling user sorting items
+export async function swapForetabItemIndexes(accountId: string, initialIndex: number, newIndex: number) {
+  let foretabSnapshot = await getDocs(
+    collection(db, 'foretab', accountId, 'tasks')
+  );
+
+  let foretabItems = foretabSnapshot.docs.map((doc) => ({
+    ...doc.data(),
+  }));
+
+  let itemsToMoveUp,
+      itemsToMoveDown: Array<DocumentData> = [],
+      draggedItem: DocumentData;
+
+  // The item the user moved
+  draggedItem = _.filter(foretabItems, function (_foretabItem) {
+    return _foretabItem.index === initialIndex;
+  });
+
+  // The item is moving farther up the list, which means the index is decreasing
+  if (initialIndex < newIndex) {
+    itemsToMoveUp = _.filter(foretabItems, function (_foretabItem) {
+      return (
+        _foretabItem.index > initialIndex && _foretabItem.index <= newIndex
+      );
+    });
+
+    // Want to make sure any items that are moved as a result of moving the dragged one are updated
+    _.forEach(itemsToMoveUp, function (_item) {
+      updateDoc(doc(db, 'foretab', accountId, 'tasks', _item.id), {
+        index: _item.index - 1,
+      });
+    });
+    // The item is moving farther down/index increasing
+  } else if (initialIndex > newIndex) {
+    itemsToMoveDown = _.filter(foretabItems, function (_foretabItem) {
+      return (
+        _foretabItem.index < initialIndex && _foretabItem.index >= newIndex
+      );
+    });
+
+    _.forEach(itemsToMoveDown, function (_item) {
+      updateDoc(doc(db, 'foretab', accountId, 'tasks', _item.id), {
+        index: _item.index + 1,
+      });
+    });
+  }
+}
+
 export async function deleteBacklogItem(accountId: string, itemId: string) {
   let backlogSnapshot = await getDocs(
     collection(db, 'backlog', accountId, 'tasks')
@@ -156,6 +211,43 @@ export async function deleteBacklogItem(accountId: string, itemId: string) {
   updateBacklogTaskCount(accountId, taskCount - 1);
 }
 
+export async function deleteForetabItem(accountId: string, itemId: string) {
+  let foretabSnapshot = await getDocs(
+    collection(db, 'foretab', accountId, 'tasks')
+  );
+
+  let foretabItems = foretabSnapshot.docs.map((doc) => ({
+    ...doc.data(),
+  }));
+
+  let taskCount = await getForetabTaskCount(accountId);
+
+  let itemsToMoveUp: Array<DocumentData> = [],
+    itemToDelete: DocumentData;
+
+  itemToDelete = _.filter(foretabItems, function (_foretabItem) {
+    return _foretabItem.id === itemId;
+  });
+
+  // No need to check and update other items if the one being deleted was the only one on the account
+  if (itemToDelete[0].index !== taskCount - 1) {
+    // Any item below the deleted one must be updated
+    itemsToMoveUp = _.filter(foretabItems, function (_foretabItem) {
+      return _foretabItem.index > itemToDelete[0].index;
+    });
+
+    _.forEach(itemsToMoveUp, function (_item) {
+      updateDoc(doc(db, 'backlog', accountId, 'tasks', _item.id), {
+        index: _item.index - 1,
+      });
+    });
+  }
+
+  // Finally delete the item and update the count
+  await deleteDoc(doc(db, 'backlog', accountId, 'tasks', itemId));
+  updateForetabTaskCount(accountId, taskCount - 1);
+}
+
 export async function moveBacklogItemToForetab(accountId: string, itemId: string, description: string) {
   let taskCount = await getForetabTaskCount(accountId);
   let newDocRef = doc(collection(db, 'foretab', accountId, 'tasks'));
@@ -171,6 +263,23 @@ export async function moveBacklogItemToForetab(accountId: string, itemId: string
   });
 
   updateForetabTaskCount(accountId, taskCount + 1);
+  updateBacklogTaskCount(accountId, taskCount - 1);
+}
+
+export async function moveForetabItemToBacklog(accountId: string, itemId: string, description: string) {
+  let taskCount = await getBacklogTaskCount(accountId);
+  let newDocRef = doc(collection(db, 'backlog', accountId, 'tasks'));
+
+  await setDoc(newDocRef, {
+    dateAdded: serverTimestamp(),
+    description: description,
+    id: itemId,
+    index: taskCount,
+    tag: ''
+  });
+
+  updateBacklogTaskCount(accountId, taskCount + 1);
+  updateForetabTaskCount(accountId, taskCount - 1);
 }
 
 async function getForetabTaskCount(accountId: string): Promise<number> {
