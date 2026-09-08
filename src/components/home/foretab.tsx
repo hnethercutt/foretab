@@ -8,27 +8,6 @@ import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, DragEndEvent } from '@dnd-kit/react';
 import { Ellipsis, Trash2, PencilLine, SmilePlus } from 'lucide-react';
 
-// import { useRef } from "react";
-// import CustomInput from "./CustomInput";
-
-// export default function ParentComponent() {
-//   const inputRef = useRef<HTMLInputElement>(null);
-
-//   const focusInput = () => {
-//     inputRef.current?.focus();
-//   };
-
-//   return (
-//     <div className="p-4">
-//       {/* Pass the ref directly as a prop */}
-//       <CustomInput myRef={inputRef} placeholder="Type here..." />
-//       <button onClick={focusInput} className="mt-2 btn">
-//         Focus Input
-//       </button>
-//     </div>
-//   );
-// }
-
 export default function Foretab() {
   const currentUser = useAuth();
   const [foretabItems, setForetabItems] = useState<Array<BacklogTaskItem>>([]);
